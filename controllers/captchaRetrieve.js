@@ -1,6 +1,7 @@
 const config = require("../config.json");
 const captchaModel = require("../models/captcha")
 
+// Create a captcha
 module.exports.createACaptcha = async(ctx) => {
 
 	let user;
@@ -16,15 +17,16 @@ module.exports.createACaptcha = async(ctx) => {
 	await ctx.render("captcha", {
 		title: config.site.name,
 		user: user,
-        array: questionArr
+        arrayOfCards: questionArr
 	});
 };
 
 
-
+// Check for error
 module.exports.checkForErr = async(ctx) => {
 
 	let user;
+	ctx.state.api = true;
     
 	if (ctx.isAuthenticated()) {
 		user = ctx.session.passport.user;
@@ -35,12 +37,11 @@ module.exports.checkForErr = async(ctx) => {
     const userAnswer = ctx.request.body;
 
     if (!userAnswer) {
-		throw new Error("Missing parameter object");
+		ctx.throw(400, "Missing parameter object"); // if error is thrown from controllers
 	}
 
     const result = captchaModel.checkCAPTCHA(user, userAnswer);
 
-    if(result == "WRONG"){
-        throw new Error(result);
-    }
+	return ctx.body = result;
+
 };
